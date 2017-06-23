@@ -1,0 +1,3 @@
+---
+graylog_server_host: localhost
+graylog_server_port: 514

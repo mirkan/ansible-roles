@@ -1,0 +1,55 @@
+- name: "Install latest version of deluge"
+  package: state=latest name={{ item }} 
+  with_items:
+      - deluge
+      - python2-mako
+
+- name: "create deluge directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0770
+    owner: "{{ deluge_user }}"
+    group: "{{ deluge_group }}"
+  with_items:
+    - "{{ deluge_user_home}}"
+    - "{{ deluge_directory_download }}"
+    - "{{ deluge_config }}"
+  tags:
+    - install
+
+- name: "Create Download directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ deluge_directory_download_movies }}"
+    - "{{ deluge_directory_download_series }}"
+
+- name: "configure web-user"
+  template:
+    src: auth.j2
+    dest: "{{ deluge_user_home }}/.config/deluge/auth"
+    owner: "{{ deluge_user }}"
+    group: "{{ deluge_group }}"
+    mode: 0644
+
+- name: "configure core.conf"
+  template:
+    src: core.conf.j2
+    dest: "{{ deluge_user_home }}/.config/deluge/core.conf"
+    owner: "{{ deluge_user }}"
+    group: "{{ deluge_group }}"
+    mode: 0644
+
+- name: "Ensure deluged service is started"
+  service:
+    name: deluged
+    state: started
+    enabled: yes
+
+- name: "Ensure deluge-web service is started"
+  service:
+    name: deluge-web
+    state: started
+    enabled: yes

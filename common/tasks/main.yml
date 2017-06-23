@@ -1,0 +1,14 @@
+---
+- name: Update pacman cache
+  pacman: update_cache=yes
+
+- name: Install Tmux
+  pacman: name=tmux state=present
+
+- name: Install Zsh
+  pacman: name=zsh state=present
+
+- name: Install ntp
+  pacman: name=ntp state=present
+  notify:
+    - Start NTP

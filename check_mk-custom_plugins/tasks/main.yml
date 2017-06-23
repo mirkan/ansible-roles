@@ -1,0 +1,32 @@
+---
+# check_mk_custom_checks/tasks/main.yml
+# when: ansible_distribution == 'Ubuntu' and ansible_lsb.major_release|int >= 16 
+#- name: Configuration for check_mk_agent
+#  lineinfile: dest=/etc/xinetd.d/check_mk regexp="{{item.regex}}" line="{{item.replace_with}}"
+#  with_items:
+#    - regex: '^\s*#only_from'
+#      replace_with: '        only_from      = 127.0.0.1 10.10.74.37 10.10.81.253 213.136.48.206'
+#    - regex: '^\s*disable'
+#      replace_with: '        disable        = no'
+
+- name: "Install Check_MK-Agent"
+  package: state=latest name={{ item }} 
+  with_items:
+      - check-mk-agent
+      - xinetd
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+# Copy ALL the plugins!
+- name: Copying UpdatesAPT-check plugin
+  copy: src=files/plugins dest=/usr/lib/check_mk_agent owner=root group=root mode=755
+
+# Adding the APT-check
+#- name: Copying UpdatesAPT-check plugin
+#  copy: src=files/plugins/mk_apt dest=/usr/lib/check_mk_agent/plugins owner=root group=root mode=755
+#  copy: src=files/mk_apt dest=/usr/lib/check_mk_agent/local/25000/ owner=root group=root mode=755
+
+# Copy the check_mk-conf (/etc/xinetd.d/check_mk)
+- name: Copying the xinetd-conf 
+  copy: src=files/xinetd_check_mk.conf dest=/etc/xinetd.d/check_mk owner=root group=root mode=644
+  notify:
+      - restart xinetd

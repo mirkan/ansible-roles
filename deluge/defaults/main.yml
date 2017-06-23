@@ -1,0 +1,15 @@
+---
+deluge_user: "deluge"
+deluge_group: "deluge"
+deluge_download_complete: "/srv/deluge/download"
+
+deluge_user_home: "/srv/deluge"
+deluge_config: "{{ deluge_user_home }}/.config/deluge"
+
+deluge_directory_download: "{{ deluge_user_home }}/download"
+deluge_directory_download_movies: "{{ deluge_directory_download }}/movies"
+deluge_directory_download_series: "{{ deluge_directory_download }}/series"
+
+deluge_webuser: "admin"
+deluge_webuser_pw: "12345"
+deluge_webuser_lvl: '10'

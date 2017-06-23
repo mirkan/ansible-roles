@@ -1,0 +1,9 @@
+---
+- name: Daemon-reload
+  command: systemctl daemon-reload
+
+- name: Start rtorrent
+  service: 
+    name: rtorrent
+    state: started 
+    enabled: yes

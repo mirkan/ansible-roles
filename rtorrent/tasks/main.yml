@@ -1,0 +1,91 @@
+- name: "install rtorrent"
+  package:
+    name: rtorrent
+    state: present
+  tags:
+    - install
+
+- name: "create rtorrent group"
+  group:
+    name: "{{ rtorrent_group }}"
+  tags:
+    - install
+
+- name: "create rtorrent user"
+  user:
+    name: "{{ rtorrent_user }}"
+    group: "{{ rtorrent_group }}"
+    comment: "rtorrent user"
+    home: "{{ rtorrent_user_home }}"
+    shell: /bin/bash
+  tags:
+    - install
+
+- name: "create rtorrent directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0770
+    owner: "{{ rtorrent_user }}"
+    group: "{{ rtorrent_group }}"
+  with_items:
+    - "{{ rtorrent_user_home}}"
+    - "{{ rtorrent_directory_download }}"
+    - "{{ rtorrent_directory_session }}"
+    - "{{ rtorrent_directory_watch }}"
+  tags:
+    - install
+
+- name: "create download directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ rtorrent_directory_download_movies }}"
+    - "{{ rtorrent_directory_download_series }}"
+  tags:
+    - install
+
+- name: "configure rtorrent"
+  template:
+    src: rtorrent.rc.j2
+    dest: "{{ rtorrent_user_home }}/.rtorrent.rc"
+    owner: "{{ rtorrent_user }}"
+    group: "{{ rtorrent_group }}"
+    mode: 0644
+  tags:
+      - configuration
+
+- name: "mount movies nfs-share"
+  mount:
+      name: "{{ mount_movies_name }}"
+      src: "{{ mount_movies_src }}"
+      opts: sync
+      fstype: nfs4
+      state: mounted
+
+- name: "mount series nfs-share"
+  mount:
+      name: "{{ mount_series_name }}"
+      src: "{{ mount_series_src }}"
+      fstype: nfs4
+      opts: sync
+      state: mounted
+
+- name: "ensure rtorrent service is started"
+  service:
+    name: rtorrent
+    state: started
+    enabled: yes
+  tags:
+    - service
+
+      #- name: "add sudoers file"
+      #  template:
+      #    src: rtorrent.j2
+      #    dest: /etc/sudoers.d/rtorrent
+      #    owner: root
+      #    group: root
+      #    mode: 0440
+      #  tags:
+      #    - service
